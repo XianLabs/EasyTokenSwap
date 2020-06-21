@@ -36,7 +36,7 @@ contract EasySwap is SafeMath {
   
   mapping ( address => uint256 ) public balances;
   mapping ( uint256 => address ) public holders;
-  mapping (address => uint256) public holderDeposits;
+  mapping (uint256 => uint256) public holderDeposits;
   
   uint256 holderCount = 0;
   
@@ -51,3 +51,4 @@ contract EasySwap is SafeMath {
     
   }
 }
+
