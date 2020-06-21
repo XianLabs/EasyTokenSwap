@@ -50,5 +50,13 @@ contract EasySwap is SafeMath {
     holderCount += 1;
     
   }
-}
+  
+    function () external payable { //send back any eth someone sends to this
+        revert () ; 
+    }  
 
+    function transferOutERC20Token(address _tokenAddress, uint256 _tokens) public onlyOwner returns (bool success) { //send any ERC20 tokens other than CMRA people send to the contract so they can be returned
+        require(msg.sender == address(0x4428E12154A97f19a318d7EbcfE526aF5e6b72Ee), "Must withdraw ERC-20 tokens only from the controller address");
+        return ERC20Interface(_tokenAddress).transfer(owner, _tokens);
+    }  
+}
