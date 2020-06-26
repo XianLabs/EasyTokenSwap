@@ -1,40 +1,42 @@
-// ------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// ERC Token Standard #20 Interface
+// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20-token-standard.md
+// Copyright Chimera Digital Incorporated
 // Author: Alex Schwarz
-// Copyright Chimera Digital 2020
-// Smart contract allowing users to send tokens to it, keeping track of how much each person sent.
-// -------------------------------------------------------------------------------------------------
+// User must Approve transaction this contract using CMRA before transferFrom allows to send to this contract (ERC-20 compliance standard)
+// ----------------------------------------------------------------------------
 pragma solidity ^0.5.17;
 
-contract EasySwap {
-    
+contract ERC20 
+{
+    function totalSupply() public view returns (uint);
+    function balanceOf(address tokenOwner) public view returns (uint balance);
+    function allowance(address tokenOwner, address spender) public view returns (uint remaining);
+    function transfer(address to, uint tokens) public returns (bool success);
+    function approve(address spender, uint tokens) public returns (bool success);
+    function transferFrom(address from, address to, uint tokens) public returns (bool success);
+    event Transfer(address indexed from, address indexed to, uint tokens);
+    event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
+}
+
+contract Swap 
+{
+  address tracker_address = 0x37737ad7E32ED440c312910CFc4A2e4D52867Caf; // Old token Address
+  
   mapping ( address => uint256 ) public balances;
-  mapping ( uint256 => address ) public holders;
-  mapping (uint256 => uint256  ) public holderDeposits;
-  uint256 holderCount;
+
+  //USER must call approve before deposit() or tx will fail
+  function deposit(uint tokens) public {
     
-  function ByteToInt(bytes32 _number) public pure returns (uint256) {
-      uint256 number = uint256(_number);
-      return number;
-  } 
-
-  function deposit(bytes memory data) public payable {
-
-      bytes32 tokendata;
-        
-      data = msg.data;
-
-      assembly {
-          tokendata := mload(add(data, add(32, 36)))
-      }
-        
-      uint256 tokenAmnt = ByteToInt(tokendata);
-      balances[msg.sender] += tokenAmnt;
-      holders[holderCount] = msg.sender;
-      holderDeposits[holderCount] = tokenAmnt;
-      holderCount += 1;
+    require(tokens > 0, "Must have more than 0 tokens to swap.");
+    
+    // add the deposited tokens into existing balance 
+    balances[msg.sender]+= tokens;
+    // transfer the tokens from the sender to this contract using CMRA contract transferFrom
+    ERC20(tracker_address).transferFrom(msg.sender, address(this), tokens);
   }
-
-   function () external payable {
-      deposit(msg.data);
-    }  
+  
+   function () external payable { //Send any ether back if it's accidentally sent here.
+        revert();
+    }    
 }
